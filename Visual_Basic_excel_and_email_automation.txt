@@ -1,0 +1,430 @@
+' by pedro yanez
+' summary: the following code reduced the time from 32 hours done by 8 people, to 2 hours done by 1 person
+' in the past, it took 8 people, around 4 hours each to do this "manually".
+' it automatically send 108 personalized e-mails to 108 bank branches, sorting through more than 25 excel sheets, filtering in each sheet
+' the code corresponding to the branch. Writing in the e-mail the information filtered in those excel sheets, and the to, and cc,
+' is for the boss, supervisor and zone boss of that particular branch.
+' Programming of code:
+' 0) loops through the excel file that contains the code of all the branches. Takes the first branch code and starts to write the email for that branch. 
+' 1) create a list of e-mails. In the sheet "Datos Sucursales" (Branch Data), obtains the e-mails of the people related to the Branch Code.
+' 2) Writes the body of the mail as string
+' 3) Loops through 2 workbooks that are open. "Excelencia Operativa" and "Eficiencia en Costos". (Operational excelence, and cost eficiency)
+' In total more than 25 sheets are looped.
+' 3.1)As an example. in one the excel sheets, called "Alarmas" (Alarms). The program loops that sheet, through hundreds of rows, in all the
+' cases the row coincides with the code of the branch, it copies the row and paste the row in the e-mail. For instance the e-mail will say:
+' Dear Branch Code 176, In February you had the following errors:
+' Alarms Error Branch 176 :  Error 1...column 1, column2 column3...
+'                            Error 2...column 1, column2 column3...
+'                            Error 3...column 1, column2 column3...
+'Profiles Error Branch 176:  Error1...column1...
+'                            Error2...column1...
+'3.2) Loops through each worksheet
+'5) It defines the required information for the e-mail. The message and the excel rows (with range to html method), the to, the bcc.
+'6)It sends the e-mail with the method .send
+
+
+Sub Envía_Correo_Errores_v2()
+
+Dim cod_suc As Double
+
+For k = 8 To 114
+
+'For k = 24 To 114
+
+Windows("BD Dotacion_v2.xlsm").Activate
+Sheets("CUADRO RESUMEN").Select
+
+Cells(k, 1).Select
+'0)
+cod_suc = Cells(ActiveCell.Row, 1)
+
+nom_suc = Cells(ActiveCell.Row, 8)
+
+Windows("BD Dotacion_v2.xlsm").Activate
+Sheets("Datos Sucursales").Select
+
+Cells(1, 1).Select
+   
+   ult_fila_datos_sucursales = Selection.End(xlDown).Row
+   
+   Dim rng3 As Range
+Set rng3 = Worksheets("Datos Sucursales").Range(Cells(2, 27), Cells(4, 27))
+
+Dim lista_emails(1 To 100) As String
+
+Dim lista_emails_copia(1 To 100) As String
+    contador_copia = 1
+ Dim contador_e_mail As Double
+ contador_e_mail = 1
+
+'1)
+For y = 1 To ult_fila_datos_sucursales
+
+If Cells(y, 3) = cod_suc Then
+
+If ((Cells(y, 23) = 1 Or Cells(y, 23) = 2) And Cells(y, 11) = "Jefe Sucursal") Or (Cells(y, 23) = 0 And Cells(y, 11) = "Supervisor Sénior") Then
+
+lista_emails(contador_e_mail) = Cells(y, 18)
+
+contador_e_mail = contador_e_mail + 1
+
+Else
+
+lista_emails_copia(contador_copia) = Cells(y, 18)
+contador_copia = contador_copia + 1
+
+End If
+
+End If
+
+Next y
+ 
+
+contador_zonal = 1
+
+Dim StrBody_4 As String
+Dim StrBody_5 As String
+
+StrBody_4 = ""
+StrBody_5 = ""
+
+Dim listado_zonales(1 To 10) As String
+
+Dim listado_zonales_back_up(1 To 10) As String
+
+
+For y = 1 To ult_fila_datos_sucursales
+
+If Cells(y, 3) = cod_suc Then
+
+listado_zonales(contador_zonal) = Cells(y, 21)
+
+listado_zonales_back_up(contador_zonal) = Cells(y, 22)
+
+StrBody_4 = StrBody_4 & listado_zonales(contador_zonal) & ";"
+
+contador_zonal = contador_zonal + 1
+
+Exit For
+
+End If
+
+Next y
+
+If contador_copia > 1 Then
+
+For y = 1 To contador_copia - 1
+
+StrBody_5 = StrBody_5 & lista_emails_copia(y) & ";"
+
+Next y
+ 
+End If
+
+Dim StrBody As String
+StrBody = ""
+
+If contador_e_mail > 1 Then
+
+For x = 1 To contador_e_mail - 1
+
+StrBody = StrBody & lista_emails(x) & ";"
+
+Next x
+
+End If
+'2)
+  Dim StrBody_2 As String
+ StrBody_2 = "Estimados," & "<br>" & "<br>" & Chr(10) & Chr(10) & "Junto con saludar, adjunto los errores operativos correspondientes a Marzo 2020. Por el momento los errores de horas extras no están disponibles, pero serán enviados más adelante, apenas estén disponibles." & "<br>" & "<br>" & Chr(10) & Chr(10) & "El plazo para enviar los descargos es a más tardar el lunes 27 de abril a las 11:30 hrs." & "<br>" & "<br>" & Chr(10) & Chr(10) & " En el caso de las sucursales que estén cerradas temporalmente por cuarentena o por algún otro motivo, lógicamente este plazo no aplica. Y el momento en que aperturen y tengan la facultad de enviar sus descargos, estos serán revisados." & "<br>" & "<br>" & Chr(10) & Chr(10) & "Favor realice sus descargos por e-mail, no por teléfono. Se dará respuesta a su correo dentro de un plazo de 24 horas hábiles." & "<br>" & "<br>" & Chr(10) & Chr(10)
+
+Dim libro As Workbook
+
+Dim es As String
+
+Dim rng(1 To 1000) As Range
+Dim mensaje(1 To 1000) As String
+
+Dim cuenta_rango As Double
+Dim cuenta_mensaje(1 To 1000) As Double
+
+For Each libro In Workbooks
+
+If InStr(libro.Name, "Excelencia Sucursales") > 0 Then
+
+es = libro.Name
+
+Exit For
+
+End If
+
+Next
+
+Dim ec As String
+'3)
+For Each libro In Workbooks
+
+If InStr(libro.Name, "Detalle_Eficiencia_Costo") > 0 Then
+
+ec = libro.Name
+
+Exit For
+
+End If
+
+Next
+
+Windows(ec).Activate
+
+cuenta_rango = 1
+cuenta_mensaje(cuenta_rango) = 1
+
+Dim nom_hoja As String
+
+Dim hoja As Worksheet
+
+For Each hoja In Worksheets
+
+nom_hoja = hoja.Name
+
+If nom_hoja <> "DetalleEficienciaCosto" Then
+
+Sheets(nom_hoja).Select
+
+col_cod_suc = busca_columna_cod_suc
+
+Cells(2, col_cod_suc).Select
+   ult_fil = Selection.End(xlDown).Row
+
+col_error = busca_columna_error(nom_hoja)
+
+For x = 2 To ult_fil
+
+If Cells(x, col_cod_suc) = cod_suc Then
+
+If Cells(x, col_error) > 0 Then
+
+col_ini = Col_Letter(2)
+col_fin = Col_Letter(busca_columna_final)
+
+Set rng(cuenta_rango) = Sheets(nom_hoja).Range(col_ini & 2 & ":" & col_fin & 2 & "," & col_ini & x & ":" & col_fin & x).SpecialCells(xlCellTypeVisible)
+
+mensaje(cuenta_mensaje(cuenta_rango)) = "Error de " & nom_hoja
+
+cuenta_rango = cuenta_rango + 1
+cuenta_mensaje(cuenta_rango) = cuenta_mensaje(cuenta_rango - 1) + 1
+
+If nom_hoja = "ALARMAS" Then
+
+col_ini_alarma = Col_Letter(1)
+col_fin_alarma = Col_Letter(22)
+
+Set rng(cuenta_rango) = Sheets(nom_hoja).Range(col_ini_alarma & 116 & ":" & col_fin_alarma & 118).SpecialCells(xlCellTypeVisible)
+
+mensaje(cuenta_mensaje(cuenta_rango)) = "Detalle Alarmas Falla Humana"
+
+cuenta_rango = cuenta_rango + 1
+cuenta_mensaje(cuenta_rango) = cuenta_mensaje(cuenta_rango - 1) + 1
+
+Cells(119, 1).Select
+   
+ ult_fil_al = Selection.End(xlDown).Row
+
+For e = 119 To ult_fil_al
+
+If Cells(e, 2) = cod_suc And Cells(e, 5) <> "" And Cells(e, 12) = "" Then
+'3.1)
+Set rng(cuenta_rango) = Sheets(nom_hoja).Range(col_ini_alarma & e & ":" & col_fin_alarma & e).SpecialCells(xlCellTypeVisible)
+
+mensaje(cuenta_mensaje(cuenta_rango)) = " "
+
+cuenta_rango = cuenta_rango + 1
+cuenta_mensaje(cuenta_rango) = cuenta_mensaje(cuenta_rango - 1) + 1
+
+End If
+
+Next e
+
+End If
+
+Exit For
+
+
+End If
+
+End If
+
+Next x
+
+End If
+
+Next hoja
+
+Windows(es).Activate
+
+'cuenta_rango = 1
+
+'Dim nom_hoja As String
+
+'Dim hoja As Worksheet
+'3.2)
+For Each hoja In Worksheets
+
+nom_hoja = hoja.Name
+
+flag = ""
+
+If nom_hoja <> "EXCELENCIA" Then
+
+Sheets(nom_hoja).Select
+
+If Cells(1, 2) <> "Sin errores" Then
+
+col_cod_suc = busca_columna_cod_suc
+
+
+
+Cells(2, col_cod_suc).Select
+   ult_fil = Selection.End(xlDown).Row
+
+'col_error = busca_columna_error(nom_hoja)
+
+For x = 2 To ult_fil
+
+If Cells(x, col_cod_suc) = cod_suc Then
+
+'If Cells(x, col_error) > 0 Then
+
+col_ini = Col_Letter(2)
+col_fin = Col_Letter(busca_columna_final)
+
+If flag <> "Titulo ya Establecido" Then
+
+Set rng(cuenta_rango) = Sheets(nom_hoja).Range(col_ini & 2 & ":" & col_fin & 2).SpecialCells(xlCellTypeVisible)
+
+mensaje(cuenta_mensaje(cuenta_rango)) = "Error de " & nom_hoja
+
+If nom_hoja = "GL MNMX" Then mensaje(cuenta_mensaje(cuenta_rango)) = "Error de GL"
+
+If nom_hoja = "INSUMOS MESÓN" Then mensaje(cuenta_mensaje(cuenta_rango)) = "Error de " & nom_hoja & " (Se refiere a la información de stock de insumos de mesón que la sucursal diariamente ingresa a través de un link de Google Docs)."
+
+If nom_hoja = "CONTROL SALDOS" Then mensaje(cuenta_mensaje(cuenta_rango)) = "Error de " & nom_hoja & " (Se refiere a la información de los saldos de dinero que quedan en la sucursal, indicando el monto para cada tipo de billete. Esta información se ingresa diariamente en un link de Google Docs, en general al ir finalizando la jornada)."
+
+flag = "Titulo ya Establecido"
+
+cuenta_rango = cuenta_rango + 1
+cuenta_mensaje(cuenta_rango) = cuenta_mensaje(cuenta_rango - 1) + 1
+
+End If
+
+Set rng(cuenta_rango) = Sheets(nom_hoja).Range(col_ini & x & ":" & col_fin & x).SpecialCells(xlCellTypeVisible)
+
+mensaje(cuenta_rango) = "nulo"
+
+cuenta_rango = cuenta_rango + 1
+cuenta_mensaje(cuenta_rango) = cuenta_mensaje(cuenta_rango - 1) + 1
+
+
+
+'Exit For
+
+'End If
+
+End If
+
+Next x
+
+End If
+
+End If
+
+Next hoja
+
+
+    Dim OutApp As Object
+    Dim OutMail As Object
+    
+    With Application
+    
+       ' .EnableEvents = False
+        .ScreenUpdating = False
+    End With
+'
+    Set OutApp = CreateObject("Outlook.Application")
+    Set OutMail = OutApp.CreateItem(0)
+
+    On Error Resume Next
+    
+    Dim w As Double
+
+If cuenta_rango > 1 Then OutMail.htmlbody = StrBody_2
+If cuenta_rango = 1 Then OutMail.htmlbody = "Estimados," & "<br>" & "<br>" & Chr(10) & Chr(10) & "Junto con saludar, informo que por el momento su sucursal no tuvo ningún error operativo en Marzo 2020. De todos modos, hay que esperar el informe de errores de las horas extras, las cuales no están disponibles en estos momentos. Felicitaciones por la buena gestión realizada."
+'5)
+OutMail.To = StrBody & ";" & StrBody_4
+OutMail.Subject = "Errores Operativos Marzo 2020 Sucursal " & cod_suc & " - " & nom_suc
+
+If cuenta_rango > 1 Then
+
+    For w = 1 To cuenta_rango - 1
+           
+If mensaje(w) = "nulo" Then
+         
+OutMail.htmlbody = OutMail.htmlbody & rangetoHTML(rng(w)) '& "<br>" & "<br>" & Chr(10) & Chr(10)
+           
+Else
+
+OutMail.htmlbody = OutMail.htmlbody & mensaje(w) & rangetoHTML(rng(w))  '& "<br>" & "<br>" & Chr(10) & Chr(10)
+        
+        
+End If
+    Next w
+    
+    End If
+    
+'If cuenta_rango = 1 Then OutMail.htmlbody = OutMail.htmlbody & "Sucursal sin errores en Mayo 2018. No es necesario que envíe ningún tipo de descargo."
+
+
+
+OutMail.htmlbody = OutMail.htmlbody & "<br>" & "<br>" & Chr(10) & Chr(10) & "Saludos cordiales, " & "<br>" & "<br>" & Chr(10) & Chr(10) & rangetoHTML(rng3)
+   
+   Windows("BD Dotacion_v2.xlsm").Activate
+Sheets("CUADRO RESUMEN").Select
+   
+'6)
+    With OutMail
+       ' .to = "prueba"
+        .CC = ""
+        .BCC = StrBody_5
+        '.Subject = ""
+'        .htmlbody = rangetoHTML(rng(1)) '& rangetoHTML(rng(2)) ' & rangetoHTML(rng(3)) & rangetoHTML(rng(4)) & rangetoHTML(rng(5))
+'          .Attachments.Add ("\\Wxp-cnunez1\gestión_operaciones\REP VIGENTES\" & mes_nombre & " " & año & "\Vigentes-Reporte " & dia & "-" & mes & "-" & año & ".xlsx")
+    '  .Display   'or use .Display
+     .send
+    End With
+    On Error GoTo 0
+
+    With Application
+        '.EnableEvents = True
+        .ScreenUpdating = True
+    End With
+
+    Set OutMail = Nothing
+    Set OutApp = Nothing
+
+Windows("BD Dotacion_v2.xlsm").Activate
+Sheets("CUADRO RESUMEN").Select
+
+Cells(k, 1).Select
+
+  With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .Color = 65535
+        .TintAndShade = 0
+        .PatternTintAndShade = 0
+    End With
+
+
+
+Next k
+
+End Sub
