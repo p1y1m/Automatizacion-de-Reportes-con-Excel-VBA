@@ -1,29 +1,4 @@
-' by pedro yanez
-' summary: the following code reduced the time from 32 hours done by 8 people, to 2 hours done by 1 person
-' in the past, it took 8 people, around 4 hours each to do this "manually".
-' it automatically send 108 personalized e-mails to 108 bank branches, sorting through more than 25 excel sheets, filtering in each sheet
-' the code corresponding to the branch. Writing in the e-mail the information filtered in those excel sheets, and the to, and cc,
-' is for the boss, supervisor and zone boss of that particular branch.
-' Programming of code:
-' 0) loops through the excel file that contains the code of all the branches. Takes the first branch code and starts to write the email for that branch. 
-' 1) create a list of e-mails. In the sheet "Datos Sucursales" (Branch Data), obtains the e-mails of the people related to the Branch Code.
-' 2) Writes the body of the mail as string
-' 3) Loops through 2 workbooks that are open. "Excelencia Operativa" and "Eficiencia en Costos". (Operational excelence, and cost eficiency)
-' In total more than 25 sheets are looped.
-' 3.1)As an example. in one the excel sheets, called "Alarmas" (Alarms). The program loops that sheet, through hundreds of rows, in all the
-' cases the row coincides with the code of the branch, it copies the row and paste the row in the e-mail. For instance the e-mail will say:
-' Dear Branch Code 176, In February you had the following errors:
-' Alarms Error Branch 176 :  Error 1...column 1, column2 column3...
-'                            Error 2...column 1, column2 column3...
-'                            Error 3...column 1, column2 column3...
-'Profiles Error Branch 176:  Error1...column1...
-'                            Error2...column1...
-'3.2) Loops through each worksheet
-'5) It defines the required information for the e-mail. The message and the excel rows (with range to html method), the to, the bcc.
-'6)It sends the e-mail with the method .send
-
-
-Sub EnvÌa_Correo_Errores_v2()
+Sub Env√≠a_Correo_Errores_v2()
 
 Dim cod_suc As Double
 
@@ -62,7 +37,7 @@ For y = 1 To ult_fila_datos_sucursales
 
 If Cells(y, 3) = cod_suc Then
 
-If ((Cells(y, 23) = 1 Or Cells(y, 23) = 2) And Cells(y, 11) = "Jefe Sucursal") Or (Cells(y, 23) = 0 And Cells(y, 11) = "Supervisor SÈnior") Then
+If ((Cells(y, 23) = 1 Or Cells(y, 23) = 2) And Cells(y, 11) = "Jefe Sucursal") Or (Cells(y, 23) = 0 And Cells(y, 11) = "Supervisor S√©nior") Then
 
 lista_emails(contador_e_mail) = Cells(y, 18)
 
@@ -135,7 +110,7 @@ Next x
 End If
 '2)
   Dim StrBody_2 As String
- StrBody_2 = "Estimados," & "<br>" & "<br>" & Chr(10) & Chr(10) & "Junto con saludar, adjunto los errores operativos correspondientes a Marzo 2020. Por el momento los errores de horas extras no est·n disponibles, pero ser·n enviados m·s adelante, apenas estÈn disponibles." & "<br>" & "<br>" & Chr(10) & Chr(10) & "El plazo para enviar los descargos es a m·s tardar el lunes 27 de abril a las 11:30 hrs." & "<br>" & "<br>" & Chr(10) & Chr(10) & " En el caso de las sucursales que estÈn cerradas temporalmente por cuarentena o por alg˙n otro motivo, lÛgicamente este plazo no aplica. Y el momento en que aperturen y tengan la facultad de enviar sus descargos, estos ser·n revisados." & "<br>" & "<br>" & Chr(10) & Chr(10) & "Favor realice sus descargos por e-mail, no por telÈfono. Se dar· respuesta a su correo dentro de un plazo de 24 horas h·biles." & "<br>" & "<br>" & Chr(10) & Chr(10)
+ StrBody_2 = "Estimados," & "<br>" & "<br>" & Chr(10) & Chr(10) & "Junto con saludar, adjunto los errores operativos correspondientes a Marzo 2020. Por el momento los errores de horas extras no est√°n disponibles, pero ser√°n enviados m√°s adelante, apenas est√©n disponibles." & "<br>" & "<br>" & Chr(10) & Chr(10) & "El plazo para enviar los descargos es a m√°s tardar el lunes 27 de abril a las 11:30 hrs." & "<br>" & "<br>" & Chr(10) & Chr(10) & " En el caso de las sucursales que est√©n cerradas temporalmente por cuarentena o por alg√∫n otro motivo, l√≥gicamente este plazo no aplica. Y el momento en que aperturen y tengan la facultad de enviar sus descargos, estos ser√°n revisados." & "<br>" & "<br>" & Chr(10) & Chr(10) & "Favor realice sus descargos por e-mail, no por tel√©fono. Se dar√° respuesta a su correo dentro de un plazo de 24 horas h√°biles." & "<br>" & "<br>" & Chr(10) & Chr(10)
 
 Dim libro As Workbook
 
@@ -305,9 +280,9 @@ mensaje(cuenta_mensaje(cuenta_rango)) = "Error de " & nom_hoja
 
 If nom_hoja = "GL MNMX" Then mensaje(cuenta_mensaje(cuenta_rango)) = "Error de GL"
 
-If nom_hoja = "INSUMOS MES”N" Then mensaje(cuenta_mensaje(cuenta_rango)) = "Error de " & nom_hoja & " (Se refiere a la informaciÛn de stock de insumos de mesÛn que la sucursal diariamente ingresa a travÈs de un link de Google Docs)."
+If nom_hoja = "INSUMOS MES√ìN" Then mensaje(cuenta_mensaje(cuenta_rango)) = "Error de " & nom_hoja & " (Se refiere a la informaci√≥n de stock de insumos de mes√≥n que la sucursal diariamente ingresa a trav√©s de un link de Google Docs)."
 
-If nom_hoja = "CONTROL SALDOS" Then mensaje(cuenta_mensaje(cuenta_rango)) = "Error de " & nom_hoja & " (Se refiere a la informaciÛn de los saldos de dinero que quedan en la sucursal, indicando el monto para cada tipo de billete. Esta informaciÛn se ingresa diariamente en un link de Google Docs, en general al ir finalizando la jornada)."
+If nom_hoja = "CONTROL SALDOS" Then mensaje(cuenta_mensaje(cuenta_rango)) = "Error de " & nom_hoja & " (Se refiere a la informaci√≥n de los saldos de dinero que quedan en la sucursal, indicando el monto para cada tipo de billete. Esta informaci√≥n se ingresa diariamente en un link de Google Docs, en general al ir finalizando la jornada)."
 
 flag = "Titulo ya Establecido"
 
@@ -357,7 +332,7 @@ Next hoja
     Dim w As Double
 
 If cuenta_rango > 1 Then OutMail.htmlbody = StrBody_2
-If cuenta_rango = 1 Then OutMail.htmlbody = "Estimados," & "<br>" & "<br>" & Chr(10) & Chr(10) & "Junto con saludar, informo que por el momento su sucursal no tuvo ning˙n error operativo en Marzo 2020. De todos modos, hay que esperar el informe de errores de las horas extras, las cuales no est·n disponibles en estos momentos. Felicitaciones por la buena gestiÛn realizada."
+If cuenta_rango = 1 Then OutMail.htmlbody = "Estimados," & "<br>" & "<br>" & Chr(10) & Chr(10) & "Junto con saludar, informo que por el momento su sucursal no tuvo ning√∫n error operativo en Marzo 2020. De todos modos, hay que esperar el informe de errores de las horas extras, las cuales no est√°n disponibles en estos momentos. Felicitaciones por la buena gesti√≥n realizada."
 '5)
 OutMail.To = StrBody & ";" & StrBody_4
 OutMail.Subject = "Errores Operativos Marzo 2020 Sucursal " & cod_suc & " - " & nom_suc
@@ -380,7 +355,7 @@ End If
     
     End If
     
-'If cuenta_rango = 1 Then OutMail.htmlbody = OutMail.htmlbody & "Sucursal sin errores en Mayo 2018. No es necesario que envÌe ning˙n tipo de descargo."
+'If cuenta_rango = 1 Then OutMail.htmlbody = OutMail.htmlbody & "Sucursal sin errores en Mayo 2018. No es necesario que env√≠e ning√∫n tipo de descargo."
 
 
 
@@ -396,7 +371,7 @@ Sheets("CUADRO RESUMEN").Select
         .BCC = StrBody_5
         '.Subject = ""
 '        .htmlbody = rangetoHTML(rng(1)) '& rangetoHTML(rng(2)) ' & rangetoHTML(rng(3)) & rangetoHTML(rng(4)) & rangetoHTML(rng(5))
-'          .Attachments.Add ("\\Wxp-cnunez1\gestiÛn_operaciones\REP VIGENTES\" & mes_nombre & " " & aÒo & "\Vigentes-Reporte " & dia & "-" & mes & "-" & aÒo & ".xlsx")
+'          .Attachments.Add ("\\Wxp-cnunez1\gesti√≥n_operaciones\REP VIGENTES\" & mes_nombre & " " & a√±o & "\Vigentes-Reporte " & dia & "-" & mes & "-" & a√±o & ".xlsx")
     '  .Display   'or use .Display
      .send
     End With
@@ -428,3 +403,4 @@ Cells(k, 1).Select
 Next k
 
 End Sub
+
